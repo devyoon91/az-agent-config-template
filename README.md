@@ -149,6 +149,57 @@ docker compose up -d agent-zero --force-recreate
 - **이유 설명**: "왜 이 규칙인지" 배경을 적으면 에이전트가 맥락을 이해
 - **파일 분리**: 주제별로 파일을 나누면 에이전트가 관련 내용만 정확히 검색
 
+## 프로젝트 템플릿
+
+`templates/`에 프로젝트 보일러플레이트를 넣어두면 Agent Zero가 새 프로젝트 생성 시 복사하여 사용합니다.
+
+```
+templates/
+  ├── springboot-api/         ← Spring Boot API 템플릿
+  │   ├── src/main/java/...
+  │   ├── build.gradle
+  │   ├── Dockerfile
+  │   └── .github/workflows/ci.yml
+  ├── nextjs-app/             ← Next.js 프론트엔드 템플릿
+  └── python-fastapi/         ← FastAPI 백엔드 템플릿
+```
+
+사용 예시:
+> "templates/springboot-api를 복사해서 새 프로젝트 만들어줘"
+
+### 작성 팁
+
+- 실제로 **동작하는 최소 프로젝트** 구조
+- Dockerfile, CI/CD, 테스트 구조 포함
+- README.md에 사용법 작성
+- 회사 표준 설정(코드 스타일, 린트, 포맷터) 포함
+
+---
+
+## 커스텀 인스트루먼트
+
+`instruments/`에 실행 가능한 스크립트/프로그램을 넣으면 Agent Zero가 자동으로 인식하여 `code_execution_tool`로 실행합니다.
+
+```
+instruments/
+  ├── deploy-checker/         ← 배포 상태 확인 스크립트
+  │   ├── README.md           ← 인스트루먼트 설명 (에이전트가 읽음)
+  │   └── check.sh
+  └── db-migration/           ← DB 마이그레이션 도우미
+      ├── README.md
+      └── migrate.py
+```
+
+각 인스트루먼트에 `README.md`를 넣으면 에이전트가 설명을 읽고 언제 사용해야 하는지 판단합니다.
+
+### 작성 팁
+
+- 폴더별 하나의 기능
+- `README.md`에 용도, 사용법, 파라미터 설명
+- 실행 가능한 스크립트 포함 (sh, py, js 등)
+
+---
+
 ## 관련 문서
 
 - [하네스 킷 저장소](https://github.com/devyoon91/az-cliproxy-docker)
