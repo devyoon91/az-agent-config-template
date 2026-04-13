@@ -98,19 +98,33 @@ D:/docker/
 
 ```yaml
 volumes:
-  # 커스텀 에이전트 프로필 (개별 마운트)
+  # ── 에이전트 프로필 (⚠️ 반드시 개별 마운트) ──
   - ../az-agent-config/agents/reviewer:/a0/agents/reviewer:ro
   - ../az-agent-config/agents/devops:/a0/agents/devops:ro
+  # 프로필 추가 시 여기에 한 줄씩 추가
 
-  # 지식베이스
+  # ── 지식베이스 (⚠️ 서브 디렉토리로 마운트) ──
   - ../az-agent-config/knowledge:/a0/knowledge/custom/team:ro
 
-  # 프로젝트 템플릿
+  # ── 아래는 통째 마운트 가능 ──
   - ../az-agent-config/templates:/a0/work_dir/templates:ro
-
-  # 커스텀 인스트루먼트
   - ../az-agent-config/instruments:/a0/instruments/custom:ro
 ```
+
+> **⚠️ 주의: 절대 통째로 마운트하지 마세요**
+> 
+> | 디렉토리 | 통째 마운트 | 이유 |
+> |----------|:---:|------|
+> | `agents/` | ❌ | 내장 프로필(developer, researcher 등)이 사라짐 |
+> | `knowledge/` | ❌ | 내장 지식(main/about/)이 사라짐 |
+> | `templates/` | ✅ | work_dir 하위라 충돌 없음 |
+> | `instruments/` | ✅ | 별도 경로라 충돌 없음 |
+> 
+> ```yaml
+> # ❌ 이렇게 하면 안 됩니다
+> - ../az-agent-config/agents:/a0/agents          # 내장 프로필 전부 사라짐
+> - ../az-agent-config/knowledge:/a0/knowledge     # 내장 지식 전부 사라짐
+> ```
 
 ### 3. 컨테이너 재시작
 
