@@ -35,8 +35,6 @@ az-agent-config/
 │   ├── architecture.md         # 아키텍처 패턴
 │   └── git-workflow.md         # Git 워크플로우
 │
-├── templates/                  # 프로젝트 보일러플레이트
-│
 ├── instruments/                # 커스텀 인스트루먼트
 │
 └── README.md
@@ -115,36 +113,39 @@ D:/docker/
 
 ```yaml
 volumes:
-  # ── 에이전트 프로필 (⚠️ 반드시 개별 마운트) ──
+  # ── 에이전트 프로필 (개별 마운트 권장 — 내장 프로필 보존) ──
   - ../az-agent-config/agents/reviewer:/a0/usr/agents/reviewer:ro
   - ../az-agent-config/agents/devops:/a0/usr/agents/devops:ro
   # 프로필 추가 시 여기에 한 줄씩 추가
 
-  # ── 스킬 (✅ 통째 마운트 가능) ──
+  # ── 스킬 ──
   - ../az-agent-config/skills:/a0/usr/skills:ro
 
-  # ── 지식베이스 (⚠️ 서브 디렉토리로 마운트) ──
-  - ../az-agent-config/knowledge:/a0/knowledge/custom/team:ro
+  # ── 지식베이스 (custom keyword 가 자동 매핑하는 경로) ──
+  - ../az-agent-config/knowledge:/a0/usr/knowledge:ro
 
-  # ── 아래는 통째 마운트 가능 ──
-  - ../az-agent-config/templates:/a0/work_dir/templates:ro
-  - ../az-agent-config/instruments:/a0/instruments/custom:ro
+  # ── 인스트루먼트 ──
+  - ../az-agent-config/instruments:/a0/usr/instruments:ro
 ```
 
-> **⚠️ 주의: 절대 통째로 마운트하지 마세요**
-> 
-> | 디렉토리 | 통째 마운트 | 이유 |
-> |----------|:---:|------|
-> | `agents/` | ❌ | 내장 프로필(developer, researcher 등)이 사라짐 |
-> | `knowledge/` | ❌ | 내장 지식(main/about/)이 사라짐 |
-> | `skills/` | ✅ | `usr/skills/`는 내장 스킬과 분리됨 |
-> | `templates/` | ✅ | work_dir 하위라 충돌 없음 |
-> | `instruments/` | ✅ | 별도 경로라 충돌 없음 |
-> 
+> **ℹ️ v1.13 layout — `/a0/usr/` 가 사용자 영역, 내장과 분리**
+>
+> Agent Zero v1.13 은 내장(`/a0/agents`, `/a0/knowledge`, `/a0/instruments`) 과
+> 사용자 추가(`/a0/usr/agents`, `/a0/usr/knowledge`, `/a0/usr/instruments`) 를
+> 디렉토리 레벨에서 분리. 사용자 자산은 항상 `/a0/usr/` 하위로 마운트하면 내장과
+> 공존.
+>
+> | 디렉토리 | 마운트 대상 | 비고 |
+> |----------|---|------|
+> | `agents/` | `/a0/usr/agents/{이름}` (프로필 단위) | 통째로 `/a0/usr/agents` 마운트도 가능하나 다른 출처 프로필과 섞이지 않게 단위 마운트 권장 |
+> | `skills/` | `/a0/usr/skills` (통째) | — |
+> | `knowledge/` | `/a0/usr/knowledge` (통째) | `custom` keyword 가 자동 매핑 |
+> | `instruments/` | `/a0/usr/instruments` (통째) | — |
+>
 > ```yaml
-> # ❌ 이렇게 하면 안 됩니다
-> - ../az-agent-config/agents:/a0/agents          # 내장 프로필 전부 사라짐
-> - ../az-agent-config/knowledge:/a0/knowledge     # 내장 지식 전부 사라짐
+> # ❌ 내장 영역을 통째 덮어쓰면 내장 자산이 사라짐
+> - ../az-agent-config/agents:/a0/agents
+> - ../az-agent-config/knowledge:/a0/knowledge
 > ```
 
 ### 3. 컨테이너 재시작
@@ -169,33 +170,6 @@ docker compose up -d agent-zero --force-recreate
 - **예시 포함**: 규칙마다 좋은 예/나쁜 예를 함께 작성
 - **이유 설명**: "왜 이 규칙인지" 배경을 적으면 에이전트가 맥락을 이해
 - **파일 분리**: 주제별로 파일을 나누면 에이전트가 관련 내용만 정확히 검색
-
-## 프로젝트 템플릿
-
-`templates/`에 프로젝트 보일러플레이트를 넣어두면 Agent Zero가 새 프로젝트 생성 시 복사하여 사용합니다.
-
-```
-templates/
-  ├── springboot-api/         ← Spring Boot API 템플릿
-  │   ├── src/main/java/...
-  │   ├── build.gradle
-  │   ├── Dockerfile
-  │   └── .github/workflows/ci.yml
-  ├── nextjs-app/             ← Next.js 프론트엔드 템플릿
-  └── python-fastapi/         ← FastAPI 백엔드 템플릿
-```
-
-사용 예시:
-> "templates/springboot-api를 복사해서 새 프로젝트 만들어줘"
-
-### 작성 팁
-
-- 실제로 **동작하는 최소 프로젝트** 구조
-- Dockerfile, CI/CD, 테스트 구조 포함
-- README.md에 사용법 작성
-- 회사 표준 설정(코드 스타일, 린트, 포맷터) 포함
-
----
 
 ## 커스텀 스킬
 
